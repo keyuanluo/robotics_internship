@@ -114,3 +114,88 @@ exit
 ```bash
 sudo systemctl stop sshd
 ```
+###
+---
+###
+## 多用户设置
+### 1. 新建多个用户
+**主用户：** <br>
+终端执行指令
+```bash
+sudo adduser `自定义用户名`
+```
+当你添加用户时，将会触发提示：
+```plaintext
+Adding user `自定义用户名' ...
+Adding new group `自定义用户名' (100X) ...
+Adding new user `自定义用户名' (100X) with group `自定义用户名' ...
+Creating home directory `/home/自定义用户名' ...
+Copying files from `/etc/skel' ...
+New password:
+BAD PASSWORD: The password is shorter than 8 characters
+Retype new password:
+passwd: password updated successfully
+Changing the user information for team1
+Enter the new value, or press ENTER for the default
+        Full Name []:
+        Room Number []:
+        Work Phone []:
+        Home Phone []:
+        Other []:
+Is the information correct? [Y/n]
+```
+仅需要设置密码时输入密码，其余设置可按 `Enter` 键跳过，最终确认输入 `Y` 确认
+### 2. 验证创建的用户
+**主用户：** <br>
+终端执行指令
+```bash
+cat /etc/passwd | grep '/home'
+```
+输出中会显示包含主用户名在内的所有用户名
+### 3. 使用子用户账号进行远程连接
+**客户端：** <br>
+终端执行指令
+```bash
+ssh `子用户名` @ `服务器内网IP`
+```
+### 4. 用户权限分配
+默认状态下子用户只能操作自己的目录下的文件，可以通过以下方式给予权限
+#### 一、设置管理员用户
+**主用户：** <br>
+终端执行指令
+```bash
+sudo usermod -aG sudo `子用户名`
+```
+如需取消某个用户的管理员权限，则<br>
+**主用户：** <br>
+终端执行指令
+```bash
+sudo gpasswd -d `子用户名` sudo
+```
+#### 二、添加用户至主用户组下
+**主用户：** <br>
+终端执行指令
+```bash
+sudo usermod -aG `主用户名` `子用户名`
+```
+如需将某个用户移出主用户组，则<br>
+终端在主用户执行指令
+```bash
+sudo gpasswd -d `子用户名` `主用户名`
+```
+#### 三、修改文件读写权限
+**主用户：** <br>
+终端执行指令
+```bash
+chmod `用户类型``操作符``权限字符` `文件/目录`
+```
+用户类型：`u`=owner（文件所属用户），`g`=group（所属组），`o`=other（其他用户），`a`=all<br>
+操作符：`+`= 添加权限，`-`= 移除权限，`=`= 设置权限<br>
+权限字符：`r`=读取，`w`=编辑，`x`=执行<br>
+例如，赋予其他用户主用户文件夹的读取权限为：<br>
+**主用户：** <br>
+终端执行指令
+```bash
+chmod o+rx ~
+```
+此时其他用户能够读取主用户文件夹，但不能修改/删除文件
